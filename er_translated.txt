@@ -1,0 +1,2 @@
+# Pre-optimisation:
+Staff(sID, Salary, Name, DOB, Gender, cID)
