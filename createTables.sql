@@ -79,7 +79,7 @@ CREATE TABLE Rents
     EndDate int NOT NULL,
     Rate int NOT NULL,
     CHECK(StartDate < EndDate),
-    CHECK(Duration = StartDate - EndDate),
+    CHECK(Duration = EndDate- StartDate),
     CHECK(Deposit > Rate)
 );
 

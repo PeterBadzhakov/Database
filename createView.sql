@@ -5,7 +5,7 @@ set schema PETAR_NIKO_PROTECTED;
 CREATE VIEW currently_taken
 AS
     SELECT DISTINCT Rents.cVIN FROM Rents
-    WHERE TO_DATE(ENDDATE) > CURRENT_DATE; -- Todo: write TO_DATE function UNIX -> Date
+    WHERE PETAR_NIKO_PROTECTED.utt(ENDDATE) > CURRENT_TIMESTAMP; -- Todo: write TO_DATE function UNIX -> Date
 
 CREATE VIEW broken
 AS
