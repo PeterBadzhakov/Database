@@ -1,0 +1,51 @@
+DROP FUNCTION ttu;
+-- Converts Timestamp to Unix time.
+CREATE FUNCTION ttu(start_timestamp timestamp)
+RETURNS int
+BEGIN
+    DECLARE y INT;
+    set y = CAST(YEAR(start_timestamp) AS INT);
+    DECLARE m INT;
+    SET m = CAST( MONTH(start_timestamp) AS INT);
+    DECLARE d INT;
+    SET d = CAST( DAYS(start_timestamp) AS INT);
+
+    IF (m <= 2) THEN
+        SET y = y - 1;
+    END IF;
+
+    DECLARE era INT;
+    IF (y >= 0) THEN
+        SET era = y;
+    ELSE
+        SET era = y - 399;
+    end if;
+    SET era = era / 400;
+
+    DECLARE yoe INT;
+    SET yoe = y - era * 400;
+
+    DECLARE doy INT;
+    IF (m > 2) THEN
+        SET doy = -3;
+    ELSE
+        SET doy = 9;
+    END IF;
+    SET doy = doy + m;
+    SET doy = doy * 153;
+    SET doy = doy + 2;
+    SET doy = doy / 5;
+    SET doy = doy + (d - 1);
+
+    DECLARE doe INT;
+    SET doe = yoe * 365;
+    SET doe = doe + yoe/4;
+    SET doe = doe - yoe/100;
+    SET doe = doe + doy;
+
+    DECLARE res INT;
+    SET res = era * 146097 + doe - 719468;
+    SET res = res * 24 * 60 * 60;
+
+    RETURN res;
+END;
