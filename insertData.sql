@@ -37,7 +37,7 @@ values (0, 1300, 'Hasen Bojinov', 1969, 'M', 0),
 
 insert into STAFF
 values (2, 5650, 'Radoslava Radomirova', 1989, 'F', 1),
-       (3, 900, 'Enza Castro', 1776, 'F', 1);
+       (3, 900, 'Enza Castro', 1955, 'F', 1);
 
 -- Add one staff per customer.
 insert into CUSTOMERS
