@@ -21,6 +21,8 @@ CREATE TRIGGER Rent_valid_date
                 N.CVIN in (SELECT CVIN
                            FROM PETAR_NIKO_PROTECTED.available_cars)
         )
+    SIGNAL SQLSTATE 'ER001' SET MESSAGE_TEXT = 'THIS IS AN ILLEGAL INSERT';
+    /* OLDER VERSION!!! currently NOT USED!!!
     select *
     from RENTS,
          RENTS,
@@ -35,7 +37,30 @@ CREATE TRIGGER Rent_valid_date
          RENTS,
          RENTS,
          RENTS,
-         RENTS;
+         RENTS;*/
+
+--Check if a branch is added in a city which already has one.
+DROP Trigger Branch_city;
+CREATE TRIGGER Branch_city
+    BEFORE INSERT
+    ON BRANCHES
+    REFERENCING NEW AS N
+    FOR EACH ROW
+    WHEN (N.CITY in (select CITY from BRANCHES))
+SIGNAL SQLSTATE 'ER001' SET MESSAGE_TEXT = 'THIS IS AN ILLEGAL INSERT';
+
+--Check to see if the staff we hire are young enough.
+Drop Trigger Check_staff;
+Create Trigger Check_staff
+BEFORE INSERT
+    ON STAFF
+    REFERENCING NEW AS N
+    FOR EACH ROW
+    WHEN((N.DOB > 1992) --at least 18 years old
+        or (N.DOB <= 1950 )--we hire only young staff
+        or (N.Salary >= 6000))
+    SIGNAL SQLSTATE 'ER001' SET MESSAGE_TEXT = 'THIS IS AN ILLEGAL INSERT';
+
 
 -- Upon removing a staff member, next one to last one's customers.
 DROP TRIGGER fire_staff;
@@ -55,3 +80,4 @@ BEGIN
     WHERE SID = O.SID;
 
 END;
+
