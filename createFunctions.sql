@@ -1,8 +1,7 @@
 set schema PETAR_NIKO_PROTECTED;
 
-DROP FUNCTION utt;
 -- Converts Unix time to Timestamp
-CREATE FUNCTION utt(start_time int)
+CREATE OR REPLACE FUNCTION utt(start_time int)
     RETURNS timestamp
 BEGIN
     ATOMIC
@@ -13,10 +12,8 @@ BEGIN
     RETURN result;
 END;
 
-
-DROP FUNCTION ttu;
 -- Converts Timestamp to Unix time.
-CREATE FUNCTION ttu(start_timestamp timestamp)
+CREATE OR REPLACE FUNCTION ttu(start_timestamp timestamp)
     RETURNS int
 BEGIN
     DECLARE y INT;
@@ -67,16 +64,106 @@ BEGIN
     RETURN res;
 END;
 
-DROP FUNCTION CARS.damage_car;
-CREATE FUNCTION CARS.damage_car(vin CHAR(17))
-RETURNS CHAR(17)
-MODIFIES SQL DATA
+CREATE OR REPLACE PROCEDURE fix_car(IN vin CHARACTER(17), IN reg VARCHAR(10))
+    MODIFIES SQL DATA
 BEGIN
+    -- Fix Engine.
     UPDATE CARS
-        SET BHP = 0
-    WHERE CARS.cvin = vin;
-
-    RETURN vin;
+    SET BHP = 100 -- Realistically, check real value in owner's manual.
+    WHERE CARS.cvin = vin
+      AND CARS.REGNUMBER = reg;
+    -- Fix Compression.
+    UPDATE CATA
+    SET CATA.COMPRESSION = 100 -- Realistically, check real value in owner's manual.
+    WHERE CATA.CVIN = vin
+      AND CATA.REGNUMBER = reg;
+    -- Fix Seatcount.
+    UPDATE CATB
+    SET CATB.SEATCOUNT = 4 -- Realistically, check real value in owner's manual.
+    WHERE CATB.CVIN = vin
+      AND CATB.REGNUMBER = reg;
+    -- Fix CargoHold.
+    UPDATE CATC
+    SET CATC.CARGOHOLD = 500 -- Realistically, check real value in owner's manual.
+    WHERE CATC.CVIN = vin
+      AND CATC.CARGOHOLD = reg;
 END;
 
+CREATE OR REPLACE PROCEDURE damage_car(IN vin CHARACTER(17), IN reg VARCHAR(10))
+    MODIFIES SQL DATA
+BEGIN
+    -- Break Engine.
+    UPDATE CARS
+    SET BHP = 0
+    WHERE CARS.cvin = vin
+      AND CARS.REGNUMBER = reg;
+    -- Break Compression.
+    UPDATE CATA
+    SET CATA.COMPRESSION = 0
+    WHERE CATA.CVIN = vin
+      AND CATA.REGNUMBER = reg;
+    -- Break Seatcount.
+    UPDATE CATB
+    SET CATB.SEATCOUNT = 0
+    WHERE CATB.CVIN = vin
+      AND CATB.REGNUMBER = reg;
+    -- Break CargoHold.
+    UPDATE CATC
+    SET CATC.CARGOHOLD = 0
+    WHERE CATC.CVIN = vin
+      AND CATC.CARGOHOLD = reg;
+END;
 
+CREATE OR REPLACE FUNCTION get_category(vin CHAR(17))
+    RETURNS CHAR(1)
+BEGIN
+    DECLARE cat CHAR(1);
+
+    IF (0 < (SELECT COUNT(*) FROM CATA WHERE CVIN = vin)) THEN
+        SET cat = 'A';
+    ELSEIF (0 < (SELECT COUNT(*) FROM CATB WHERE CVIN = vin)) THEN
+        SET cat = 'B';
+    ELSEIF (0 < (SELECT COUNT(*) FROM CATC WHERE CVIN = vin)) THEN
+        SET cat = 'C';
+    ELSE
+        SET cat = '0';
+    END IF;
+
+    RETURN cat;
+END;
+
+CREATE OR REPLACE FUNCTION get_color(col BIGINT)
+    RETURNS CHAR(1)
+BEGIN
+    -- Three color octets.
+    DECLARE red BIGINT;
+    DECLARE green BIGINT;
+    DECLARE blue BIGINT;
+    DECLARE red_align BIGINT;
+    DECLARE green_align BIGINT;
+    DECLARE blue_align BIGINT;
+
+    SET red = 255;
+    SET green = 255;
+    SET blue = 255;
+    SET red_align = col / (256*256*256);
+    SET green_align = col / (256*256);
+    SET blue_align = col / 256;
+
+    -- col := red * 2^24 OR green * 2^16 OR blue * 2^8 OR luminance.
+    -- Capture color values and remove the exponent.
+    SET red = CAST(BITAND(red_align, red) AS INTEGER);
+    SET green = CAST(BITAND(green_align, green) AS INTEGER);
+    SET blue = CAST(BITAND(blue_align, blue) AS INTEGER);
+
+    -- The maximum of the values is the main color;
+    IF (red >= green AND red >= blue) THEN
+        RETURN 'R';
+    ELSEIF (green >= red AND green >= blue) THEN
+        RETURN 'G';
+    ELSEIF (blue >= red AND blue >= green) THEN
+        RETURN 'B';
+    END IF;
+
+    RETURN '0';
+END;

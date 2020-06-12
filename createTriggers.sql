@@ -1,8 +1,7 @@
 SET SCHEMA PETAR_NIKO_PROTECTED;
 
 -- Check that new date interval does not intersect with current date interval of same car.
-DROP TRIGGER Rent_valid_date;
-CREATE TRIGGER Rent_valid_date
+CREATE OR REPLACE TRIGGER Rent_valid_date
     BEFORE INSERT
     ON RENTS
     REFERENCING NEW AS N
@@ -40,8 +39,7 @@ CREATE TRIGGER Rent_valid_date
          RENTS;*/
 
 --Check if a branch is added in a city which already has one.
-DROP Trigger Branch_city;
-CREATE TRIGGER Branch_city
+CREATE OR REPLACE TRIGGER Branch_city
     BEFORE INSERT
     ON BRANCHES
     REFERENCING NEW AS N
@@ -50,8 +48,7 @@ CREATE TRIGGER Branch_city
 SIGNAL SQLSTATE 'ER001' SET MESSAGE_TEXT = 'THIS IS AN ILLEGAL INSERT';
 
 --Check to see if the staff we hire are young enough.
-Drop Trigger Check_staff;
-Create Trigger Check_staff
+Create OR REPLACE Trigger Check_staff
 BEFORE INSERT
     ON STAFF
     REFERENCING NEW AS N
@@ -63,8 +60,7 @@ BEFORE INSERT
 
 
 -- Upon removing a staff member, next one to last one's customers.
-DROP TRIGGER fire_staff;
-CREATE TRIGGER fire_staff
+CREATE OR REPLACE TRIGGER fire_staff
     BEFORE DELETE
     ON STAFF
     REFERENCING OLD AS O

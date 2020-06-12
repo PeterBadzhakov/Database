@@ -1,7 +1,6 @@
 set schema PETAR_NIKO_PROTECTED;
 
-DROP VIEW currently_taken;
-CREATE VIEW currently_taken
+CREATE OR REPLACE VIEW currently_taken
 AS
 SELECT DISTINCT Rents.cVIN
 FROM Rents
@@ -9,8 +8,7 @@ WHERE PETAR_NIKO_PROTECTED.utt(ENDDATE) > CURRENT_TIMESTAMP
   AND PETAR_NIKO_PROTECTED.utt(STARTDATE) < CURRENT_TIMESTAMP;
 
 
-DROP VIEW broken;
-CREATE VIEW broken
+CREATE OR REPLACE VIEW broken
 AS
 SELECT DISTINCT CVIN
 FROM (
@@ -31,16 +29,14 @@ FROM (
          WHERE car.BHP = 0
      );
 
-DROP VIEW available_cars;
-CREATE VIEW available_cars
+CREATE OR REPLACE VIEW available_cars
 AS
 SELECT car.CVIN
 FROM CARS car
 WHERE car.CVIN not in (select CVIN from broken)
   AND car.CVIN not in (select CVIN from currently_taken);
 
-DROP VIEW CARS_BRANCHES;
-create view CARS_BRANCHES
+create OR REPLACE view CARS_BRANCHES
 as
 select b.BBIC, COUNT(c.CVIN) as AVAILABLE
 from BRANCHES b,
