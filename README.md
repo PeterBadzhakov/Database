@@ -1,12 +1,5 @@
-# Database
+# Database project - Car dealership
 
-## Initial steps:
-	>Start the project in DataGrip.
-	
-	>Connect to server.
+Project goal - ease of use by car dealership proprietors for upkeep and telemetry.
 
-	>Run createTables.sql, insertData.sql, createView.sql, createTriggers.sql,
-	and createFunctions.sql to bring schema to ready-state.
-
-	>Demonstrate functionality.
-	
+Presented at the Databases course at FMI.
