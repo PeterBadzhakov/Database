@@ -2,4 +2,4 @@
 
 Project goal - ease of use by car dealership proprietors for upkeep and telemetry.
 
-Presented at the Databases course at FMI.
+Presented at the Databases course at FMI using IBM DataGrip.
